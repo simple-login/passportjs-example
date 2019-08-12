@@ -60,4 +60,51 @@ var OidcStrategy = require('passport-openidconnect').Strategy;
 At this step, `npm start` should still work and http://localhost:3000 is still this empty page.
 
 
+# Step 3: Config passport.js
+
+Just below `app.use(express.static(path.join(__dirname, 'public')));`, add the following line to init passport.js.
+
+The first part is to config `session` for passport.js, please make sure to replace `very-secret` if you decide to deploy the code on production 😎. We also need to tell passport.js how to serialize/deserialize user from/to session.
+
+The second part is to setup passport.js with OIDC endpoints and with the OAuth credential parsed from the `.env` file setup in previous step. 
+
+```js
+// passportjs use session to store user info
+app.use(session({
+  secret: 'very-secret',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, next) => {
+  next(null, user);
+});
+
+passport.deserializeUser((obj, next) => {
+  next(null, obj);
+});
+
+// config different OIDC endpoints
+passport.use('oidc', new OidcStrategy({
+  issuer: 'https://app.simplelogin.io',
+  authorizationURL: 'https://app.simplelogin.io/oauth2/authorize',
+  tokenURL: 'https://app.simplelogin.io/oauth2/token',
+  userInfoURL: 'https://app.simplelogin.io/oauth2/userinfo',
+  clientID: process.env.CLIENT_ID, // OAuth config from env thanks to dotenv
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/authorization-code/callback',
+  scope: 'openid profile'
+}, (issuer, sub, profile, accessToken, refreshToken, done) => {
+  return done(null, profile);
+}));
+
+```
+
+
+
+
+
 

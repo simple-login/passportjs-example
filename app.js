@@ -25,6 +25,38 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// passportjs use session to store user info
+app.use(session({
+  secret: 'very-secret',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, next) => {
+  next(null, user);
+});
+
+passport.deserializeUser((obj, next) => {
+  next(null, obj);
+});
+
+// config different OIDC endpoints
+passport.use('oidc', new OidcStrategy({
+  issuer: 'https://app.simplelogin.io',
+  authorizationURL: 'https://app.simplelogin.io/oauth2/authorize',
+  tokenURL: 'https://app.simplelogin.io/oauth2/token',
+  userInfoURL: 'https://app.simplelogin.io/oauth2/userinfo',
+  clientID: process.env.CLIENT_ID, // OAuth config from env thanks to dotenv
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/authorization-code/callback',
+  scope: 'openid profile'
+}, (issuer, sub, profile, accessToken, refreshToken, done) => {
+  return done(null, profile);
+}));
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
