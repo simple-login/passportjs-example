@@ -103,6 +103,88 @@ passport.use('oidc', new OidcStrategy({
 
 ```
 
+# Step 4: OpenID Connect Flow
+
+The social login starts by redirecting user to the Social Login Provider authorization page. Once user approves sharing their data with the app, user gets redirected back to the `callback` endpoint with a `code` in url that we'll use to exchange for `access token`. This `access token` will then allow us to get user information.
+
+We would need the following routes:
+
+- `/login` for redirecting user to the authorization page
+- `/authorization-code/callback` to received the `code` when user is redirected back from authorization page.
+- (Optional) `/profile` page to show the obtained user information.
+
+Let's start by adding a "Login" button onto the home page: in `views/index.ejs`, add this line just before `</body>`
+
+```
+<a href="/login">Log In</a>
+```
+
+Create a profile page to show user information. In the same terminal, create a `profile.ejs` file by `touch views/profile.ejs` and add this content to this file:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome <%= user.name %>!</p>    
+    <p>Email: <%= user.email %></p>
+    <img src="<%= user.avatar_url %>">
+    <a href="/">Home</a>
+  </body>
+</html>
+```
+
+Now let's add the 3 endpoints `/login`, `/authorization-code/callback`, `/profile` just below the code we added in the previous step:
+
+```js
+// redirect user to authorization page
+app.use('/login', passport.authenticate('oidc'));
+
+// user is redirected back with the *code*
+app.use('/authorization-code/callback',
+  passport.authenticate('oidc', {
+    failureRedirect: '/error'
+  }),
+  (req, res) => {
+    // redirect user to /profile so they can see their information
+    res.redirect('/profile');
+  }
+);
+
+// show user info
+app.use('/profile', (req, res) => {
+  console.log("user:", req);
+  res.render('profile', {
+    title: 'User Info',
+    user: req.user._json
+  });
+});
+```
+
+Now re-run `npm start`, http://localhost:3000 should show this login button and clicking on the login button should open the authorization page.
+
+![](./docs/step-4a.png)
+
+Authorization page
+
+![](./docs/step-4b.png)
+
+User gets redirected back to our app:
+
+![](./docs/step-4c.png)
+
+Congratulations, you just add social login to a Node.js app using passport.js with OpenID Connect strategy!
+
+
+
+
+
+
+
 
 
 

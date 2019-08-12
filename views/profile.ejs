@@ -6,7 +6,9 @@
   </head>
   <body>
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    <a href="/login">Log In</a>
+    <p>Welcome <%= user.name %>!</p>    
+    <p>Email: <%= user.email %></p>
+    <img src="<%= user.avatar_url %>">
+    <a href="/">Home</a>
   </body>
 </html>

@@ -57,6 +57,30 @@ passport.use('oidc', new OidcStrategy({
   return done(null, profile);
 }));
 
+// redirect user to authorization page
+app.use('/login', passport.authenticate('oidc'));
+
+// user is redirected back with the *code*
+app.use('/authorization-code/callback',
+  passport.authenticate('oidc', {
+    failureRedirect: '/error'
+  }),
+  (req, res) => {
+    // redirect user to /profile so they can see their information
+    res.redirect('/profile');
+  }
+);
+
+// show user info
+app.use('/profile', (req, res) => {
+  console.log("user:", req);
+  res.render('profile', {
+    title: 'User Info',
+    user: req.user._json
+  });
+});
+
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
