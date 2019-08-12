@@ -1,3 +1,7 @@
+A demo can be found at https://simple-login-passportjs-example.glitch.me
+
+Feel free to **Remix** it on https://glitch.com/~simple-login-passportjs-example 🙂
+
 # Step 1: Bootstrap
 
 Create a folder for the project 
