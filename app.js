@@ -51,7 +51,7 @@ passport.use('oidc', new OidcStrategy({
   userInfoURL: 'https://app.simplelogin.io/oauth2/userinfo',
   clientID: process.env.CLIENT_ID, // OAuth config from env thanks to dotenv
   clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: 'http://localhost:3000/authorization-code/callback',
+  callbackURL: process.env.URL + '/authorization-code/callback',
   scope: 'openid profile'
 }, (issuer, sub, profile, accessToken, refreshToken, done) => {
   return done(null, profile);
